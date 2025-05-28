@@ -1,5 +1,5 @@
 import argparse
-
+import generowanie_grafu
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--hamilton', action='store_true')
@@ -8,17 +8,19 @@ def main():
 
     if args.hamilton:
         nodes = int(input("nodes > "))
-        saturation = float(input("saturation (0-100) > "))
-        while nodes<=10 or saturation>100 or saturation<0:
-            print("Wieszchołków musi być większa od 10, a saturation musi mieścić się pomiędzy 0-100:")
+        saturation = float(input("saturation (30 or 70) > "))
+        while nodes<10 or (saturation!=30 and saturation !=70):
+            print("Wieszchołków musi być większa od 10, a saturation musi być równa 30 lub 70:")
             nodes = int(input("nodes > "))
-            saturation = float(input("saturation (0-100) > "))
+            saturation = float(input("saturation (30 or 70) > "))
+        graph=generowanie_grafu.generowanie(nodes, saturation/100,"hamil")
 
     elif args.non_hamilton:
         nodes = int(input("nodes > "))
-        while nodes<=10:
+        while nodes<10:
             print("Wieszchołków muszi być większa od 10:")
             nodes = int(input("nodes > "))
+        graph=generowanie_grafu.generowanie(nodes, 50, "non-hamil")
 
     else:
         print("Podaj --hamilton lub --non-hamilton")
