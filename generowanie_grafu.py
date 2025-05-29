@@ -122,6 +122,14 @@ class Graph:
         # Po izolacji wierzchołek powinien mieć pustą listę sąsiadów
         assert len(self.adjacency[vertex]) == 0
 
+    def get_adjacency_matrix(self):
+        matrix = [[0] * (self.n + 1) for _ in range(self.n + 1)]  # +1 dla 1-based indeksowania
+        for u in self.adjacency:
+            for v in self.adjacency[u]:
+                matrix[u][v] = 1
+                matrix[v][u] = 1  # Graf nieskierowany
+        return matrix
+
     def find_euler_cycle(self):
         if not self.is_eulerian():
             print("Graph doesn't have an Euler cycle!")
@@ -183,13 +191,11 @@ def generowanie(wierzcholki,nasycenie,hamil):
             graph.ensure_even_degrees()
             graph.ensure_connectivity()
             print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
-            return graph.adjacency
         case "non-hamil":
             graph.generate_hamiltonian_cycle()
             graph.add_edges_with_triangles(nasycenie)
             graph.ensure_even_degrees()
             graph.ensure_connectivity()
             graph.non_hamilton()
-            return graph.adjacency
 if __name__ == "__main__":
     print("Generowanie grafu")

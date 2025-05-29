@@ -41,13 +41,15 @@ def main():
             action = input("action> ").strip().lower()
             match action:
                 case "print":
-                    rep = input("representation: matrix/list/table > ").strip().lower()
+                    rep = input("representation: macierz_sasiedz/macierz_incy/list_krawe/lista_sasiedz > ").strip().lower()
                     match rep:
-                        case "matrix":
-                            print("macież")
-                        case "list":
+                        case "macierz_sasiedz":
+                            print(graph.get_adjacency_matrix())
+                        case "macierz_incy":
                             print("lista następników")
-                        case "table":
+                        case "list_krawe":
+                            print("lista krawędzi")
+                        case "lista_sasiedz":
                             print("lista krawędzi")
                         case _:
                             print("Oj, takiego typu tutaj nie mamy")
