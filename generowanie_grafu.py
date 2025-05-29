@@ -145,6 +145,14 @@ class Graph:
             matrix[v][edge_idx] = 1
 
         return matrix
+
+    def get_edge_list(self):
+        edges = set()  # Używamy set aby uniknąć duplikatów
+        for u in self.adjacency:
+            for v in self.adjacency[u]:
+                if u < v:  # Aby uniknąć duplikatów w grafie nieskierowanym
+                    edges.add((u, v))
+        return sorted(edges)
     def find_euler_cycle(self):
         if not self.is_eulerian():
             print("Graph doesn't have an Euler cycle!")

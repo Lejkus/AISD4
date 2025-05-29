@@ -48,7 +48,7 @@ def main():
                         case "macierz_incy":
                             print(graph.get_incidence_matrix())
                         case "list_krawe":
-                            print("lista krawędzi")
+                            print(graph.get_edge_list())
                         case "lista_sasiedz":
                             print("lista krawędzi")
                         case _:
