@@ -50,7 +50,7 @@ def main():
                         case "list_krawe":
                             print(graph.get_edge_list())
                         case "lista_sasiedz":
-                            print("lista krawędzi")
+                            print(graph.get_adjacency_list())
                         case _:
                             print("Oj, takiego typu tutaj nie mamy")
 

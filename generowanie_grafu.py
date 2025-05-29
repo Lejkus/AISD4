@@ -153,6 +153,11 @@ class Graph:
                 if u < v:  # Aby uniknąć duplikatów w grafie nieskierowanym
                     edges.add((u, v))
         return sorted(edges)
+
+    def get_adjacency_list(self):
+        # To właściwie jest już twoja self.adjacency
+        # Ale możesz zwrócić w bardziej uporządkowanej formie
+        return {v: sorted(neighbors) for v, neighbors in self.adjacency.items()}
     def find_euler_cycle(self):
         if not self.is_eulerian():
             print("Graph doesn't have an Euler cycle!")
