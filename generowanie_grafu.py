@@ -48,9 +48,14 @@ class Graph:
         current_edges = sum(len(adj) for adj in self.adjacency.values()) // 2
         target_edges = int(target_saturation * max_edges)
 
-        while current_edges < target_edges:
+        attempts = 0
+        max_attempts = self.n * 100  # Avoid infinite loop in dense graphs
+
+        while current_edges < target_edges and attempts < max_attempts:
             a, b, c = random.sample(range(1, self.n + 1), 3)
             added = 0
+
+            # Add triangle edges only if they don't exist
             if not self.has_edge(a, b):
                 self.add_edge(a, b)
                 added += 1
@@ -60,9 +65,9 @@ class Graph:
             if not self.has_edge(c, a):
                 self.add_edge(c, a)
                 added += 1
-            current_edges += added // 2
-            if current_edges >= max_edges:
-                break
+
+            current_edges += added
+            attempts += 1
 
     def ensure_even_degrees(self):
         while True:
@@ -136,7 +141,6 @@ class Graph:
         if not self.is_eulerian():
             print("Graf nie ma cyklu Eulera!")
             return
-
         graph_copy = {u: set(v) for u, v in self.adjacency.items()}
         stack = [1]
         path = []
@@ -150,7 +154,6 @@ class Graph:
                 path.append(stack.pop())
         print("Cykl Eulera:")
         print(" -> ".join(map(str, path[::-1])))
-
     def find_hamilton_cycle(self):
         def backtrack(current: int, visited: dict, path: List[int]) -> bool:
             if len(path) == self.n:
@@ -164,7 +167,6 @@ class Graph:
                     visited[neighbor] = False
                     path.pop()
             return False
-
         for start in range(1, self.n + 1):
             visited = {v: False for v in range(1, self.n + 1)}
             path = [start]
@@ -175,7 +177,6 @@ class Graph:
                 print(" -> ".join(map(str, path)))
                 return
         print("Nie znaleziono cyklu Hamiltona.")
-
     def export_to_tikz(self, filename=None):
         tikz = """\\documentclass{standalone}
     \\usepackage{tikz}
@@ -184,43 +185,31 @@ class Graph:
     """
         angle_step = 360 / self.n
         positions = {}
-
         for i, node in enumerate(range(1, self.n + 1)):
             angle = i * angle_step
             x = 5 * math.cos(math.radians(angle))
             y = 5 * math.sin(math.radians(angle))
             positions[node] = (x, y)
-
-        # Draw nodes
         for node, (x, y) in positions.items():
             tikz += f"  \\node ({node}) at ({x:.2f},{y:.2f}) {{{node}}};\n"
-
         drawn = set()
         for u in self.adjacency:
             for v in self.adjacency[u]:
                 if (u, v) not in drawn and (v, u) not in drawn:
                     tikz += f"  \\draw[thick] ({u}) -- ({v});\n"
                     drawn.add((u, v))
-
-        # Draw Hamiltonian cycle in red (if present)
         if self.hamiltonian_cycle:
             for i in range(len(self.hamiltonian_cycle) - 1):
                 u = self.hamiltonian_cycle[i]
                 v = self.hamiltonian_cycle[i + 1]
                 tikz += f"  \\draw[red, very thick] ({u}) -- ({v});\n"
-
         tikz += """\\end{tikzpicture}
     \\end{document}
     """
-
-        # Save to file if filename is provided
         if filename:
             with open(filename, 'w') as f:
                 f.write(tikz)
-
-        # Also print to console
         print(tikz)
-
 
 def generowanie(vertices, saturation, mode):
     graph = Graph(vertices)
@@ -229,16 +218,13 @@ def generowanie(vertices, saturation, mode):
         graph.add_edges_with_triangles(saturation)
         graph.ensure_even_degrees()
         graph.ensure_connectivity()
-        print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
     elif mode == "non-hamil":
         graph.generate_hamiltonian_cycle()
         graph.add_edges_with_triangles(saturation)
         graph.ensure_even_degrees()
         graph.ensure_connectivity()
-        print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
         graph.non_hamilton()
-        print("Graf został wygenerowany!")
-        print(graph.get_adjacency_list())
+
     return graph
 
 if __name__ == "__main__":
