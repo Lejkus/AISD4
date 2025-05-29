@@ -1,4 +1,5 @@
 import argparse
+from generowanie_grafu import Graph
 import generowanie_grafu
 def main():
     parser = argparse.ArgumentParser()
@@ -13,14 +14,17 @@ def main():
             print("Wieszchołków musi być większa od 10, a saturation musi być równa 30 lub 70:")
             nodes = int(input("nodes > "))
             saturation = float(input("saturation (30 or 70) > "))
-        graph=generowanie_grafu.generowanie(nodes, saturation/100,"hamil")
+        graph = Graph(nodes)
+        generowanie_grafu.generowanie(nodes, saturation/100,"hamil")
+
 
     elif args.non_hamilton:
         nodes = int(input("nodes > "))
         while nodes<10:
             print("Wieszchołków muszi być większa od 10:")
             nodes = int(input("nodes > "))
-        graph=generowanie_grafu.generowanie(nodes, 50, "non-hamil")
+        graph = Graph(nodes)
+        generowanie_grafu.generowanie(nodes, 50, "non-hamil")
 
     else:
         print("Podaj --hamilton lub --non-hamilton")
@@ -49,9 +53,9 @@ def main():
                             print("Oj, takiego typu tutaj nie mamy")
 
                 case "euler":
-                    print("euler")
+                    graph.find_euler_cycle()
                 case "hamilton":
-                    print("hamilton")
+                    graph.find_hamilton_cycle()
                 case "exit":
                     break
                 case _:

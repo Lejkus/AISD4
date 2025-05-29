@@ -1,6 +1,6 @@
 import random
+from typing import List
 from collections import deque
-
 class Graph:
     def __init__(self, vertices_count):
         self.n = vertices_count
@@ -121,6 +121,58 @@ class Graph:
 
         # Po izolacji wierzchołek powinien mieć pustą listę sąsiadów
         assert len(self.adjacency[vertex]) == 0
+
+    def find_euler_cycle(self):
+        if not self.is_eulerian():
+            print("Graph doesn't have an Euler cycle!")
+            return
+
+        # Make a copy of the adjacency lists
+        graph_copy = {u: set(v) for u, v in self.adjacency.items()}
+        stack = [1]  # Start from vertex 1 (1-based)
+        path = []
+
+        while stack:
+            current = stack[-1]
+            if graph_copy[current]:
+                neighbor = graph_copy[current].pop()
+                graph_copy[neighbor].remove(current)
+                stack.append(neighbor)
+            else:
+                path.append(stack.pop())
+
+        print("Euler cycle:")
+        print(" -> ".join(map(str, path[::-1])))
+
+    def find_hamilton_cycle(self):
+        def backtrack(current: int, visited: dict, path: List[int]) -> bool:
+            if len(path) == self.n:
+                return path[0] in self.adjacency[path[-1]]
+
+            for neighbor in self.adjacency[current]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    path.append(neighbor)
+                    if backtrack(neighbor, visited, path):
+                        return True
+                    visited[neighbor] = False
+                    path.pop()
+
+            return False
+
+        # Try each vertex as starting point
+        for start_node in range(1, self.n + 1):
+            visited = {v: False for v in range(1, self.n + 1)}
+            path = [start_node]
+            visited[start_node] = True
+            if backtrack(start_node, visited, path):
+                path.append(path[0])  # Complete the cycle
+                print("Hamilton cycle:")
+                print(" -> ".join(map(str, path)))
+                return
+
+        print("No Hamilton cycle found.")
+
 def generowanie(wierzcholki,nasycenie,hamil):
     vertices_count=wierzcholki
     graph = Graph(vertices_count)
@@ -131,11 +183,13 @@ def generowanie(wierzcholki,nasycenie,hamil):
             graph.ensure_even_degrees()
             graph.ensure_connectivity()
             print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
+            return graph.adjacency
         case "non-hamil":
             graph.generate_hamiltonian_cycle()
             graph.add_edges_with_triangles(nasycenie)
             graph.ensure_even_degrees()
             graph.ensure_connectivity()
-            print("Fuck you")
+            graph.non_hamilton()
+            return graph.adjacency
 if __name__ == "__main__":
     print("Generowanie grafu")
