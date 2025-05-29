@@ -34,6 +34,7 @@ def main():
     print("  Print")
     print("  Euler - Znajdowania cyklu Eulera w grafie")
     print("  Hamilton - Algorytm z powracaniem znajdowania cyklu Hamiltona w grafie")
+    print("  Export")
     print("  Exit")
 
     while True:
@@ -58,6 +59,8 @@ def main():
                     graph.find_euler_cycle()
                 case "hamilton":
                     graph.find_hamilton_cycle()
+                case "export":
+                    graph.export_to_tikz()
                 case "exit":
                     break
                 case _:

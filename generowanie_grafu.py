@@ -209,6 +209,55 @@ class Graph:
 
         print("No Hamilton cycle found.")
 
+    def export_to_tikz(self, filename=None):
+        """
+        Exports the graph to TikZ LaTeX format
+        :param filename: If provided, saves to file. Otherwise returns the string.
+        :return: TikZ LaTeX code as string if filename is None
+        """
+        tikz_code = """\\documentclass{standalone}
+    \\usepackage{tikz}
+    \\begin{document}
+    \\begin{tikzpicture}[every node/.style={draw, circle, thick, minimum size=7mm}]
+    """
+
+        # Calculate node positions on a circle
+        angle_step = 360 / self.n
+        node_positions = {}
+        for i, node in enumerate(range(1, self.n + 1)):
+            angle = i * angle_step
+            x = 5 * math.cos(math.radians(angle))
+            y = 5 * math.sin(math.radians(angle))
+            node_positions[node] = (x, y)
+
+        # Add nodes to TikZ
+        for node, (x, y) in node_positions.items():
+            tikz_code += f"    \\node ({node}) at ({x:.2f},{y:.2f}) {{{node}}};\n"
+
+        # Add edges to TikZ
+        edges = set()
+        for u in self.adjacency:
+            for v in self.adjacency[u]:
+                if (v, u) not in edges:  # Avoid duplicate edges in undirected graph
+                    edges.add((u, v))
+
+        for u, v in edges:
+            tikz_code += f"    \\draw[thick] ({u}) -- ({v});\n"
+
+        # Highlight Hamiltonian cycle if it exists
+        if hasattr(self, 'hamiltonian_cycle') and len(self.hamiltonian_cycle) > 0:
+            for i in range(len(self.hamiltonian_cycle) - 1):
+                u = self.hamiltonian_cycle[i]
+                v = self.hamiltonian_cycle[i + 1]
+                tikz_code += f"    \\draw[red, very thick] ({u}) -- ({v});\n"
+
+        tikz_code += """\\end{tikzpicture}
+    \\end{document}"""
+
+        if filename:
+            with open(filename, 'w') as f:
+                f.write(tikz_code)
+        return tikz_code
 def generowanie(wierzcholki,nasycenie,hamil):
     vertices_count=wierzcholki
     graph = Graph(vertices_count)
