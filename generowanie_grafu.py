@@ -69,7 +69,7 @@ class Graph:
             current_edges += added
             attempts += 1
 
-    def ensure_even_degrees(self):
+    def parzyste_stopnie(self):
         while True:
             odd_vertices = [v for v in self.adjacency if self.vertex_degree(v) % 2 != 0]
             if not odd_vertices:
@@ -105,7 +105,7 @@ class Graph:
             v = random.choice(list(components[i + 1]))
             self.add_edge(u, v)
 
-        self.ensure_even_degrees()
+        self.parzyste_stopnie()
 
     def non_hamilton(self):
         vertex = random.choice(self.hamiltonian_cycle)
@@ -177,6 +177,7 @@ class Graph:
                 print(" -> ".join(map(str, path)))
                 return
         print("Nie znaleziono cyklu Hamiltona.")
+
     def export_to_tikz(self, filename=None):
         tikz = """\\documentclass{standalone}
     \\usepackage{tikz}
@@ -216,12 +217,12 @@ def generowanie(vertices, saturation, mode):
     if mode == "hamil":
         graph.generate_hamiltonian_cycle()
         graph.add_edges_with_triangles(saturation)
-        graph.ensure_even_degrees()
+        graph.parzyste_stopnie()
         graph.ensure_connectivity()
     elif mode == "non-hamil":
         graph.generate_hamiltonian_cycle()
         graph.add_edges_with_triangles(saturation)
-        graph.ensure_even_degrees()
+        graph.parzyste_stopnie()
         graph.ensure_connectivity()
         graph.non_hamilton()
 

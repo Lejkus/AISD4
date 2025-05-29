@@ -1,33 +1,35 @@
 import argparse
-from generowanie_grafu import Graph, generowanie
 import generowanie_grafu
+def get_integer_input(prompt):
+    while True:
+        try:
+            value = int(input(prompt))
+            return value
+        except ValueError:
+            print("Proszę wprowadzić liczbę całkowitą!")
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hamilton', action='store_true', help='Generuj graf Hamiltonowski')
-    parser.add_argument('--non-hamilton', action='store_true', help='Generuj graf nie-Hamiltonowski')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--hamilton', action='store_true', help='Generuj graf Hamiltonowski')
+    group.add_argument('--non-hamilton', action='store_true', help='Generuj graf nie-Hamiltonowski')
     args = parser.parse_args()
 
     if args.hamilton:
-        nodes = int(input("Liczba wierzchołków > "))
-        saturation = float(input("Nasycenie (30 lub 70) > "))
+        nodes = get_integer_input("Liczba wierzchołków > ")
+        saturation = get_integer_input("Nasycenie (30 lub 70)> ")
         while nodes < 10 or saturation not in (30, 70):
             print("Liczba wierzchołków musi być większa niż 10, a nasycenie musi wynosić 30 lub 70.")
-            nodes = int(input("Liczba wierzchołków > "))
-            saturation = float(input("Nasycenie (30 lub 70) > "))
+            nodes = get_integer_input("Liczba wierzchołków > ")
+            saturation = get_integer_input("Nasycenie (30 lub 70)> ")
 
         graph = generowanie_grafu.generowanie(nodes, saturation/100, "hamil")
 
-
     elif args.non_hamilton:
-        nodes = int(input("nodes > "))
+        nodes = get_integer_input("Liczba wierzchołków > ")
         while nodes < 10:
             print("Wierzchołków musi być większa od 10:")
-            nodes = int(input("nodes > "))
+            nodes = get_integer_input("Liczba wierzchołków > ")
         graph = generowanie_grafu.generowanie(nodes, 0.5, "non-hamil")
-
-    else:
-        print("Podaj --hamilton lub --non-hamilton jako argument.")
-        return
 
     print("\nDostępne operacje na grafie:")
     print("  print      - Wypisz reprezentację grafu")
