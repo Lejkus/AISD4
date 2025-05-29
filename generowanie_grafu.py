@@ -82,7 +82,7 @@ class Graph:
             else:
                 self.add_edge(u, v)
 
-    def ensure_connectivity(self):
+    def zapewnienie_spojnosci(self):
         if self.is_connected():
             return
 
@@ -120,7 +120,17 @@ class Graph:
         for u in self.adjacency:
             for v in self.adjacency[u]:
                 matrix[u][v] = 1
-        return matrix
+        col_width = len(str(self.n)) + 1
+        print(" " * col_width, end=" |")
+        for i in range(1, self.n + 1):
+            print(f"{i:>{col_width}}", end="")
+        print()
+        print("-" * (col_width + 1) + "+" + "-" * (self.n * col_width))
+        for i in range(1, self.n + 1):
+            print(f"{i:>{col_width}} |", end="")
+            for j in range(1, self.n + 1):
+                print(f"{matrix[i][j]:>{col_width}}", end="")
+            print()
 
     def get_incidence_matrix(self):
         edges = [(u, v) for u in range(1, self.n + 1)
@@ -129,6 +139,7 @@ class Graph:
         for idx, (u, v) in enumerate(edges):
             matrix[u][idx] = 1
             matrix[v][idx] = 1
+
         return matrix
 
     def get_edge_list(self):
@@ -199,11 +210,6 @@ class Graph:
                 if (u, v) not in drawn and (v, u) not in drawn:
                     tikz += f"  \\draw[thick] ({u}) -- ({v});\n"
                     drawn.add((u, v))
-        if self.hamiltonian_cycle:
-            for i in range(len(self.hamiltonian_cycle) - 1):
-                u = self.hamiltonian_cycle[i]
-                v = self.hamiltonian_cycle[i + 1]
-                tikz += f"  \\draw[red, very thick] ({u}) -- ({v});\n"
         tikz += """\\end{tikzpicture}
     \\end{document}
     """
@@ -218,12 +224,12 @@ def generowanie(vertices, saturation, mode):
         graph.generate_hamiltonian_cycle()
         graph.add_edges_with_triangles(saturation)
         graph.parzyste_stopnie()
-        graph.ensure_connectivity()
+        graph.zapewnienie_spojnosci()
     elif mode == "non-hamil":
         graph.generate_hamiltonian_cycle()
         graph.add_edges_with_triangles(saturation)
         graph.parzyste_stopnie()
-        graph.ensure_connectivity()
+        graph.zapewnienie_spojnosci()
         graph.non_hamilton()
 
     return graph
