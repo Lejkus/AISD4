@@ -130,6 +130,21 @@ class Graph:
                 matrix[v][u] = 1  # Graf nieskierowany
         return matrix
 
+    def get_incidence_matrix(self):
+        edges = []
+        # Najpierw zbierz wszystkie unikalne krawędzie
+        for u in range(1, self.n + 1):
+            for v in range(u + 1, self.n + 1):
+                if self.has_edge(u, v):
+                    edges.append((u, v))
+
+        # Stwórz macierz incydencji
+        matrix = [[0] * len(edges) for _ in range(self.n + 1)]
+        for edge_idx, (u, v) in enumerate(edges):
+            matrix[u][edge_idx] = 1
+            matrix[v][edge_idx] = 1
+
+        return matrix
     def find_euler_cycle(self):
         if not self.is_eulerian():
             print("Graph doesn't have an Euler cycle!")

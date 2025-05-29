@@ -46,7 +46,7 @@ def main():
                         case "macierz_sasiedz":
                             print(graph.get_adjacency_matrix())
                         case "macierz_incy":
-                            print("lista następników")
+                            print(graph.get_incidence_matrix())
                         case "list_krawe":
                             print("lista krawędzi")
                         case "lista_sasiedz":
