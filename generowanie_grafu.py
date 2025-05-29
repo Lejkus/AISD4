@@ -136,11 +136,21 @@ class Graph:
         edges = [(u, v) for u in range(1, self.n + 1)
                  for v in self.adjacency[u] if u < v]
         matrix = [[0] * len(edges) for _ in range(self.n + 1)]
-        for idx, (u, v) in enumerate(edges):
-            matrix[u][idx] = 1
-            matrix[v][idx] = 1
-
-        return matrix
+        for edge_idx, (u, v) in enumerate(edges):
+            matrix[u][edge_idx] = 1
+            matrix[v][edge_idx] = 1
+        vertex_col_width = len(str(self.n)) + 1
+        edge_col_width = 3  # Enough space for 0/1 values
+        print(" " * vertex_col_width, end=" |")
+        for edge_idx in range(len(edges)):
+            print(f"e{edge_idx + 1:>{edge_col_width - 1}}", end=" ")
+        print()
+        print("-" * vertex_col_width + "+" + "-" * (len(edges) * (edge_col_width + 1)))
+        for vertex in range(1, self.n + 1):
+            print(f"{vertex:>{vertex_col_width}} |", end="")
+            for edge_idx in range(len(edges)):
+                print(f"{matrix[vertex][edge_idx]:>{edge_col_width}}", end=" ")
+            print()
 
     def get_edge_list(self):
         return sorted({(min(u, v), max(u, v)) for u in self.adjacency for v in self.adjacency[u]})
