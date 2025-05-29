@@ -1,6 +1,8 @@
 import random
+import math
 from typing import List
 from collections import deque
+
 class Graph:
     def __init__(self, vertices_count):
         self.n = vertices_count
@@ -24,7 +26,7 @@ class Graph:
     def is_eulerian(self):
         return all(self.vertex_degree(v) % 2 == 0 for v in self.adjacency)
 
-    def is_connected(self):#BFS - przeszukiwanie wszerz
+    def is_connected(self):
         visited = set()
         queue = deque([1])
         while queue:
@@ -47,9 +49,7 @@ class Graph:
         target_edges = int(target_saturation * max_edges)
 
         while current_edges < target_edges:
-            nodes = random.sample(range(1, self.n + 1), 3)
-            a, b, c = nodes
-
+            a, b, c = random.sample(range(1, self.n + 1), 3)
             added = 0
             if not self.has_edge(a, b):
                 self.add_edge(a, b)
@@ -60,24 +60,18 @@ class Graph:
             if not self.has_edge(c, a):
                 self.add_edge(c, a)
                 added += 1
-
             current_edges += added // 2
-
             if current_edges >= max_edges:
                 break
 
     def ensure_even_degrees(self):
         while True:
             odd_vertices = [v for v in self.adjacency if self.vertex_degree(v) % 2 != 0]
-
             if not odd_vertices:
                 break
-
             if len(odd_vertices) % 2 != 0:
                 raise RuntimeError("Nie można uzyskać parzystych stopni")
-
             u, v = random.sample(odd_vertices, 2)
-
             if self.has_edge(u, v):
                 self.remove_edge(u, v)
             else:
@@ -89,19 +83,16 @@ class Graph:
 
         components = []
         visited = set()
-
         for v in range(1, self.n + 1):
             if v not in visited:
                 component = set()
                 queue = deque([v])
-
                 while queue:
                     u = queue.popleft()
                     if u not in visited:
                         visited.add(u)
                         component.add(u)
                         queue.extend(self.adjacency[u] - visited)
-
                 components.append(component)
 
         for i in range(len(components) - 1):
@@ -110,64 +101,45 @@ class Graph:
             self.add_edge(u, v)
 
         self.ensure_even_degrees()
-    def non_hamilton(self):
-        vertex=random.choice(self.hamiltonian_cycle)
-        neighbors = list(self.adjacency[vertex])
 
+    def non_hamilton(self):
+        vertex = random.choice(self.hamiltonian_cycle)
+        neighbors = list(self.adjacency[vertex])
         for neighbor in neighbors:
-            # Usuń krawędź w obie strony
             self.adjacency[vertex].remove(neighbor)
             self.adjacency[neighbor].remove(vertex)
-
-        # Po izolacji wierzchołek powinien mieć pustą listę sąsiadów
         assert len(self.adjacency[vertex]) == 0
 
     def get_adjacency_matrix(self):
-        matrix = [[0] * (self.n + 1) for _ in range(self.n + 1)]  # +1 dla 1-based indeksowania
+        matrix = [[0] * (self.n + 1) for _ in range(self.n + 1)]
         for u in self.adjacency:
             for v in self.adjacency[u]:
                 matrix[u][v] = 1
-                matrix[v][u] = 1  # Graf nieskierowany
         return matrix
 
     def get_incidence_matrix(self):
-        edges = []
-        # Najpierw zbierz wszystkie unikalne krawędzie
-        for u in range(1, self.n + 1):
-            for v in range(u + 1, self.n + 1):
-                if self.has_edge(u, v):
-                    edges.append((u, v))
-
-        # Stwórz macierz incydencji
+        edges = [(u, v) for u in range(1, self.n + 1)
+                 for v in self.adjacency[u] if u < v]
         matrix = [[0] * len(edges) for _ in range(self.n + 1)]
-        for edge_idx, (u, v) in enumerate(edges):
-            matrix[u][edge_idx] = 1
-            matrix[v][edge_idx] = 1
-
+        for idx, (u, v) in enumerate(edges):
+            matrix[u][idx] = 1
+            matrix[v][idx] = 1
         return matrix
 
     def get_edge_list(self):
-        edges = set()  # Używamy set aby uniknąć duplikatów
-        for u in self.adjacency:
-            for v in self.adjacency[u]:
-                if u < v:  # Aby uniknąć duplikatów w grafie nieskierowanym
-                    edges.add((u, v))
-        return sorted(edges)
+        return sorted({(min(u, v), max(u, v)) for u in self.adjacency for v in self.adjacency[u]})
 
     def get_adjacency_list(self):
-        # To właściwie jest już twoja self.adjacency
-        # Ale możesz zwrócić w bardziej uporządkowanej formie
         return {v: sorted(neighbors) for v, neighbors in self.adjacency.items()}
+
     def find_euler_cycle(self):
         if not self.is_eulerian():
-            print("Graph doesn't have an Euler cycle!")
+            print("Graf nie ma cyklu Eulera!")
             return
 
-        # Make a copy of the adjacency lists
         graph_copy = {u: set(v) for u, v in self.adjacency.items()}
-        stack = [1]  # Start from vertex 1 (1-based)
+        stack = [1]
         path = []
-
         while stack:
             current = stack[-1]
             if graph_copy[current]:
@@ -176,15 +148,13 @@ class Graph:
                 stack.append(neighbor)
             else:
                 path.append(stack.pop())
-
-        print("Euler cycle:")
+        print("Cykl Eulera:")
         print(" -> ".join(map(str, path[::-1])))
 
     def find_hamilton_cycle(self):
         def backtrack(current: int, visited: dict, path: List[int]) -> bool:
             if len(path) == self.n:
                 return path[0] in self.adjacency[path[-1]]
-
             for neighbor in self.adjacency[current]:
                 if not visited[neighbor]:
                     visited[neighbor] = True
@@ -193,86 +163,83 @@ class Graph:
                         return True
                     visited[neighbor] = False
                     path.pop()
-
             return False
 
-        # Try each vertex as starting point
-        for start_node in range(1, self.n + 1):
+        for start in range(1, self.n + 1):
             visited = {v: False for v in range(1, self.n + 1)}
-            path = [start_node]
-            visited[start_node] = True
-            if backtrack(start_node, visited, path):
-                path.append(path[0])  # Complete the cycle
-                print("Hamilton cycle:")
+            path = [start]
+            visited[start] = True
+            if backtrack(start, visited, path):
+                path.append(path[0])
+                print("Cykl Hamiltona:")
                 print(" -> ".join(map(str, path)))
                 return
-
-        print("No Hamilton cycle found.")
+        print("Nie znaleziono cyklu Hamiltona.")
 
     def export_to_tikz(self, filename=None):
-        """
-        Exports the graph to TikZ LaTeX format
-        :param filename: If provided, saves to file. Otherwise returns the string.
-        :return: TikZ LaTeX code as string if filename is None
-        """
-        tikz_code = """\\documentclass{standalone}
+        tikz = """\\documentclass{standalone}
     \\usepackage{tikz}
     \\begin{document}
     \\begin{tikzpicture}[every node/.style={draw, circle, thick, minimum size=7mm}]
     """
-
-        # Calculate node positions on a circle
         angle_step = 360 / self.n
-        node_positions = {}
+        positions = {}
+
         for i, node in enumerate(range(1, self.n + 1)):
             angle = i * angle_step
             x = 5 * math.cos(math.radians(angle))
             y = 5 * math.sin(math.radians(angle))
-            node_positions[node] = (x, y)
+            positions[node] = (x, y)
 
-        # Add nodes to TikZ
-        for node, (x, y) in node_positions.items():
-            tikz_code += f"    \\node ({node}) at ({x:.2f},{y:.2f}) {{{node}}};\n"
+        # Draw nodes
+        for node, (x, y) in positions.items():
+            tikz += f"  \\node ({node}) at ({x:.2f},{y:.2f}) {{{node}}};\n"
 
-        # Add edges to TikZ
-        edges = set()
+        drawn = set()
         for u in self.adjacency:
             for v in self.adjacency[u]:
-                if (v, u) not in edges:  # Avoid duplicate edges in undirected graph
-                    edges.add((u, v))
+                if (u, v) not in drawn and (v, u) not in drawn:
+                    tikz += f"  \\draw[thick] ({u}) -- ({v});\n"
+                    drawn.add((u, v))
 
-        for u, v in edges:
-            tikz_code += f"    \\draw[thick] ({u}) -- ({v});\n"
-
-        # Highlight Hamiltonian cycle if it exists
-        if hasattr(self, 'hamiltonian_cycle') and len(self.hamiltonian_cycle) > 0:
+        # Draw Hamiltonian cycle in red (if present)
+        if self.hamiltonian_cycle:
             for i in range(len(self.hamiltonian_cycle) - 1):
                 u = self.hamiltonian_cycle[i]
                 v = self.hamiltonian_cycle[i + 1]
-                tikz_code += f"    \\draw[red, very thick] ({u}) -- ({v});\n"
+                tikz += f"  \\draw[red, very thick] ({u}) -- ({v});\n"
 
-        tikz_code += """\\end{tikzpicture}
-    \\end{document}"""
+        tikz += """\\end{tikzpicture}
+    \\end{document}
+    """
 
+        # Save to file if filename is provided
         if filename:
             with open(filename, 'w') as f:
-                f.write(tikz_code)
-        return tikz_code
-def generowanie(wierzcholki,nasycenie,hamil):
-    vertices_count=wierzcholki
-    graph = Graph(vertices_count)
-    match hamil:
-        case "hamil":
-            graph.generate_hamiltonian_cycle()
-            graph.add_edges_with_triangles(nasycenie)
-            graph.ensure_even_degrees()
-            graph.ensure_connectivity()
-            print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
-        case "non-hamil":
-            graph.generate_hamiltonian_cycle()
-            graph.add_edges_with_triangles(nasycenie)
-            graph.ensure_even_degrees()
-            graph.ensure_connectivity()
-            graph.non_hamilton()
+                f.write(tikz)
+
+        # Also print to console
+        print(tikz)
+
+
+def generowanie(vertices, saturation, mode):
+    graph = Graph(vertices)
+    if mode == "hamil":
+        graph.generate_hamiltonian_cycle()
+        graph.add_edges_with_triangles(saturation)
+        graph.ensure_even_degrees()
+        graph.ensure_connectivity()
+        print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
+    elif mode == "non-hamil":
+        graph.generate_hamiltonian_cycle()
+        graph.add_edges_with_triangles(saturation)
+        graph.ensure_even_degrees()
+        graph.ensure_connectivity()
+        print("\n[Cykl Hamiltona]:", " → ".join(map(str, graph.hamiltonian_cycle)))
+        graph.non_hamilton()
+        print("Graf został wygenerowany!")
+        print(graph.get_adjacency_list())
+    return graph
+
 if __name__ == "__main__":
     print("Generowanie grafu")
